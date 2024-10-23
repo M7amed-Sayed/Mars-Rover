@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mars Rover</title>
+</head>
+<body>
+  <h1>Mars Rover </h1>
+  <div>
+    <label for="commands">Enter Command String:</label>
+    <input type="text" id="commands" placeholder="e.g., FLFFFRFLB">
+    <button onclick="executeCommands()">Send Commands</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    // Rover Class
+    class Rover {
+      constructor(x, y, direction) {
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+
+        // Direction Map to handle rotations and movements
+        this.directions = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
+        this.moves = {
+          'NORTH': { dx: 0, dy: 1 },
+          'EAST': { dx: 1, dy: 0 },
+          'SOUTH': { dx: 0, dy: -1 },
+          'WEST': { dx: -1, dy: 0 }
+        };
+
+        // Command execution map
+        this.commands = {
+          'F': () => this.move(1),
+          'B': () => this.move(-1),
+          'L': () => this.rotate(-1),
+          'R': () => this.rotate(1)
+        };
+      }
+
+      // Rotate rover (-1 for left, 1 for right)
+      rotate(step) {
+        const currentIndex = this.directions.indexOf(this.direction);
+        const newIndex = (currentIndex + step + 4) % 4;  // Handle wrap-around
+        this.direction = this.directions[newIndex];
+      }
+
+      // Move rover forward or backward
+      move(multiplier) {
+        const move = this.moves[this.direction];
+        this.x += move.dx * multiplier;
+        this.y += move.dy * multiplier;
+      }
+
+      // Execute a string of commands
+      execute(commandString) {
+        [...commandString].forEach(command => {
+          const action = this.commands[command];
+          if (action) action();  // Execute the mapped function
+        });
+        return this.reportPosition();
+      }
+
+      // Report current position and heading
+      reportPosition() {
+        return `(${this.x}, ${this.y}) ${this.direction}`;
+      }
+    }
+
+    // Function to execute commands from input
+    function executeCommands() {
+      const commandString = document.getElementById('commands').value.trim().toUpperCase();
+      const rover = new Rover(4, 2, 'EAST');  // Starting point (4,2) EAST
+      const result = rover.execute(commandString);
+      document.getElementById('result').innerText = `Rover's final position: ${result}`;
+    }
+  </script>
+</body>
+</html>
